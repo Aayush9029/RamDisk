@@ -1,0 +1,3 @@
+import RamDiskEngine
+
+RamDiskCommandLine.main()

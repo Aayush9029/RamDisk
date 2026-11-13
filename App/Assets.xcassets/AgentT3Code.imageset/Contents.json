@@ -1,0 +1,18 @@
+{
+  "images": [
+    {
+      "idiom": "universal",
+      "filename": "AgentT3Code.png",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "filename": "AgentT3Code@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

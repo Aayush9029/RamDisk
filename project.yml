@@ -1,0 +1,84 @@
+name: RamDisk
+options:
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  defaultConfig: Debug
+settings:
+  base:
+    DEVELOPMENT_TEAM: 6Q29HJZ4AG
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "6.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEAD_CODE_STRIPPING: YES
+packages:
+  RamDiskKit:
+    path: RamDiskKit
+targets:
+  RamDisk:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    postBuildScripts:
+      - name: Write Launch Agent
+        basedOnDependencyAnalysis: false
+        script: |
+          folder="$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/LaunchAgents"
+          rm -rf "$folder"
+          mkdir -p "$folder"
+          sed -e "s/__AGENT_LABEL__/$AGENT_LABEL/g" -e "s/__APP_BUNDLE_ID__/$PRODUCT_BUNDLE_IDENTIFIER/g" "$SRCROOT/Helper/LaunchAgent.plist" > "$folder/$AGENT_LABEL.plist"
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: RamDisk
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: ""
+    settings:
+      base:
+        PRODUCT_NAME: RamDisk
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.optimalapps.RamDisk.debug
+          AGENT_LABEL: com.optimalapps.RamDisk.agent.debug
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: com.optimalapps.RamDisk
+          AGENT_LABEL: com.optimalapps.RamDisk.agent
+    dependencies:
+      - package: RamDiskKit
+        product: RamDiskCore
+      - target: RamDiskHelper
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
+  RamDiskHelper:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Helper/main.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.optimalapps.RamDisk.helper
+        PRODUCT_NAME: ramdisk-helper
+        PRODUCT_MODULE_NAME: RamDiskHelper
+        SKIP_INSTALL: YES
+    dependencies:
+      - package: RamDiskKit
+        product: RamDiskEngine
+schemes:
+  RamDisk:
+    build:
+      targets:
+        RamDisk: all
+    run:
+      config: Debug
+    archive:
+      config: Release
