@@ -22,15 +22,19 @@ Connect Claude Code, Codex, and OpenCode in Settings. Each connected agent gets 
 
 ## RAM Disk and SSD
 
-Measured on a MacBook Pro with 48 GB of memory, as the median of three runs. A RAM disk also writes nothing to the SSD, so agent builds and caches cause no SSD wear.
+**A save with a full flush is 27x faster on the RAM disk.** Node.js makes this flush on each `fsync`, and the SSD must then write to the flash. A RAM disk also writes nothing to the SSD, so agent builds and caches cause no SSD wear.
 
 | Task | RAM disk against the SSD |
 |---|---|
-| **Write 2 GB with `fsync`** | **1.8x faster** |
-| **Delete 20,000 files** | **1.2x faster** |
-| Delete a build folder | 1.1x faster |
-| `git clone` | 1.1x faster |
-| `swift build` | the same |
+| **Save a file 1,000 times with a full flush (Node.js `fsync`)** | **27x faster** |
+| **Save a file 1,000 times with `F_FULLFSYNC` (C)** | **20x faster** |
+| **Write 2 GB** | **1.8x faster** |
+| **Rewrite one file 20,000 times** | **1.6x faster** |
+| Unpack a `node_modules` folder with 27,000 files | 1.1x faster |
+| Delete 80,000 files | 1.1x faster |
+| Create 20,000 small files, 200 `git commit`, `swift build` | the same |
+
+Measured on a MacBook Pro with 48 GB of memory, as the median of three runs.
 
 ## Build
 
